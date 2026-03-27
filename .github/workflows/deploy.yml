@@ -36,28 +36,14 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/myprofile:latest
             ${{ secrets.DOCKER_USERNAME }}/myprofile:${{ github.sha }}
-
       - name: Triển khai lên DevOps Classroom
-        env:
-          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
         run: |
           REPO="phamminhhai1609/myprofile"
           CONTAINER_PORT=80
-
-          if [ -z "$DEPLOY_URL" ]; then
-            echo "Lỗi: DEPLOY_URL đang rỗng. Hãy kiểm tra lại GitHub Secret."
-            exit 1
-          fi
-
-          FULL_URL="${DEPLOY_URL}?repo=${REPO}&tag=latest&slot=4&container_port=${CONTAINER_PORT}&strict_container_port=0"
-
-          echo "Bắt đầu deploy..."
-          RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "$FULL_URL")
-          BODY=$(echo "$RESPONSE" | sed '$d')
+          RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_URL }}?repo=$REPO&tag=latest&slot=5&container_port=$CONTAINER_PORT&strict_container_port=0")
+          BODY=$(echo "$RESPONSE" | sed "$d")
           CODE=$(echo "$RESPONSE" | tail -n1)
-
           echo "Webhook HTTP: $CODE"
-
           if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 300 ]; then
             echo "Deploy thất bại. Xem chi tiết trong nhóm log bên dưới."
             echo "::group::Chi tiết webhook JSON"
@@ -65,7 +51,6 @@ jobs:
             echo "::endgroup::"
             exit 1
           fi
-
           echo "Deploy thành công."
           echo "::group::Chi tiết webhook JSON"
           echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
