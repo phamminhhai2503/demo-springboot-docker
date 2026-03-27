@@ -36,6 +36,7 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/myprofile:latest
             ${{ secrets.DOCKER_USERNAME }}/myprofile:${{ github.sha }}
+
       - name: Triển khai lên DevOps Classroom
         run: |
           REPO="phamminhhai1609/myprofile"
@@ -55,3 +56,4 @@ jobs:
           echo "::group::Chi tiết webhook JSON"
           echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
           echo "::endgroup::"
+        
